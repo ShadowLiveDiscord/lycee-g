@@ -724,7 +724,6 @@ function fillSelects(){
   });
 }
 fillSelects();
-setTimeout(()=>{if(isMobile&&isMobile()&&typeof syncMobileRouteSelects==='function')syncMobileRouteSelects();},300);
 
 document.getElementById('calcRoute').addEventListener('click',()=>{
   const fv=document.getElementById('routeFrom').value;
@@ -857,13 +856,7 @@ document.getElementById('aAdd').addEventListener('click',()=>{
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// MOBILE — UX Refonte complète
-// ═══════════════════════════════════════════════════════════════
-
-function isMobile(){return window.innerWidth<=768;}
-
-// ── Drawer sidebar ───────────────────────────────────────────
+// ── Mobile : Drawer & Bottom Bar ─────────────────────────────
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const drawerOverlay = document.getElementById('drawerOverlay');
 const sidebar = document.querySelector('.sidebar');
@@ -878,269 +871,66 @@ function closeDrawer(){
   drawerOverlay.classList.remove('show');
   hamburgerBtn.classList.remove('open');
 }
+function isMobile(){return window.innerWidth<=768;}
+
 hamburgerBtn.addEventListener('click',()=>{
-  sidebar.classList.contains('open')?closeDrawer():openDrawer();
+  if(sidebar.classList.contains('open'))closeDrawer();
+  else openDrawer();
 });
 drawerOverlay.addEventListener('click',closeDrawer);
-document.getElementById('mMenuBtn').addEventListener('click',()=>{
-  sidebar.classList.contains('open')?closeDrawer():openDrawer();
-});
-window.addEventListener('resize',()=>{if(!isMobile())closeDrawer();});
 
-// ── Barre de recherche mobile ────────────────────────────────
-const mSearchInput = document.getElementById('mSearchInput');
-const mSearchResults = document.getElementById('mSearchResults');
-const mSearchClear = document.getElementById('mSearchClear');
+// Bottom bar actions
+const mbbSections = {
+  search: document.querySelector('.sb:nth-child(1)'),
+  route:  document.querySelector('.sb:nth-child(4)'),
+};
 
-mSearchInput.addEventListener('input',function(){
-  const q=this.value.trim().toLowerCase();
-  mSearchClear.classList.toggle('show',q.length>0);
-  mSearchResults.innerHTML='';
-  if(!q){mSearchResults.classList.remove('show');return;}
-  const hits=allRooms().filter(r=>
-    r.label.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)
-  ).slice(0,10);
-  if(!hits.length){mSearchResults.classList.remove('show');return;}
-  const typeLabel={classroom:'Cours',special:'Spéciale',entrance:'Entrée',stair:'Escalier'};
-  hits.forEach(r=>{
-    const d=document.createElement('div');
-    d.className='m-sug-item';
-    d.innerHTML=`
-      <div class="m-sug-icon">${r.icon||'📖'}</div>
-      <div class="m-sug-info">
-        <div class="m-sug-name">Salle ${r.label}</div>
-        <div class="m-sug-floor">${r.floorLabel}</div>
-      </div>
-      <span class="m-sug-type">${typeLabel[r.type]||r.type}</span>
-    `;
-    d.addEventListener('click',()=>{
-      S.highlight=r.id;
-      S.floor=r.floor;
-      syncFloorPills(r.floor);
-      centerOn(r,r.floor);
-      draw2d();
-      mSearchInput.value='Salle '+r.label;
-      mSearchResults.classList.remove('show');
-      mSearchClear.classList.add('show');
-      closeBsRoute();
-      openBsRoom(r,r.floor);
-    });
-    mSearchResults.appendChild(d);
-  });
-  mSearchResults.classList.add('show');
-});
-
-mSearchClear.addEventListener('click',()=>{
-  mSearchInput.value='';
-  mSearchClear.classList.remove('show');
-  mSearchResults.classList.remove('show');
-  mSearchInput.focus();
-});
-
-document.addEventListener('click',e=>{
-  if(!mSearchResults.contains(e.target)&&!mSearchInput.contains(e.target)){
-    mSearchResults.classList.remove('show');
-  }
-});
-
-// ── Pills étage (sur canvas) ─────────────────────────────────
-function syncFloorPills(fid){
-  document.querySelectorAll('.m-pill').forEach(p=>p.classList.toggle('active',p.dataset.floor===fid));
-  document.querySelectorAll('.tab[data-floor]').forEach(p=>p.classList.toggle('active',p.dataset.floor===fid));
-  S.floor=fid;
-}
-document.querySelectorAll('.m-pill').forEach(btn=>{
+document.querySelectorAll('.mbb').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    syncFloorPills(btn.dataset.floor);
-    redraw();
+    document.querySelectorAll('.mbb').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const action = btn.dataset.mbb;
+    if(action==='map'){
+      closeDrawer();
+      return;
+    }
+    if(action==='search'||action==='route'){
+      openDrawer();
+      // Scroll vers la section correspondante
+      setTimeout(()=>{
+        const target = action==='search'
+          ? document.getElementById('searchInput')
+          : document.getElementById('routeFrom');
+        if(target){target.scrollIntoView({behavior:'smooth',block:'nearest'});target.focus();}
+      },300);
+      return;
+    }
+    if(action==='floor'){
+      // Cycle entre les étages
+      const order=['rdc','etage1','both'];
+      const idx=order.indexOf(S.floor);
+      S.floor=order[(idx+1)%order.length];
+      document.querySelectorAll('.tab[data-floor]').forEach(b=>b.classList.toggle('active',b.dataset.floor===S.floor));
+      redraw();drawMinimap();
+      btn.querySelector('.mbb-icon').textContent=S.floor==='rdc'?'🏠':S.floor==='etage1'?'🏢':'🏗️';
+      return;
+    }
+    if(action==='view'){
+      S.view=S.view==='2d'?'3d':'2d';
+      document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===S.view));
+      document.getElementById('view2d').classList.toggle('active',S.view==='2d');
+      document.getElementById('view3d').classList.toggle('active',S.view==='3d');
+      btn.querySelector('.mbb-icon').textContent=S.view==='2d'?'👁':'🗺️';
+      if(S.view==='3d')draw3d();
+      return;
+    }
   });
 });
 
-// ── Bouton thème mobile ──────────────────────────────────────
-document.getElementById('mThemeBtn').addEventListener('click',()=>{
-  applyTheme(S.theme==='dark'?'light':'dark');
-  document.getElementById('mThemeBtn').textContent=S.theme==='light'?'🌙':'☀';
+// Fermer le drawer si on passe en desktop
+window.addEventListener('resize',()=>{
+  if(!isMobile())closeDrawer();
 });
-
-// ── FABs flottants ───────────────────────────────────────────
-document.getElementById('mFabCenter').addEventListener('click',()=>{
-  centerView();
-  closeBsRoom();
-  closeBsRoute();
-});
-
-document.getElementById('mFabRoute').addEventListener('click',()=>{
-  closeBsRoom();
-  openBsRoute();
-});
-
-document.getElementById('mFab3d').addEventListener('click',function(){
-  S.view=S.view==='2d'?'3d':'2d';
-  this.classList.toggle('active',S.view==='3d');
-  this.textContent=S.view==='3d'?'2D':'3D';
-  document.getElementById('view2d').classList.toggle('active',S.view==='2d');
-  document.getElementById('view3d').classList.toggle('active',S.view==='3d');
-  document.querySelectorAll('.tab[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===S.view));
-  if(S.view==='3d')draw3d();
-});
-
-// ── Bottom Sheet — Salle ─────────────────────────────────────
-const bsRoom = document.getElementById('bsRoom');
-const bsOverlay = document.getElementById('bsOverlay');
-
-function openBsRoom(room,fid){
-  if(!isMobile())return;
-  const typeInfo2={
-    classroom:{label:'Salle de cours',cap:30,icon:'📖'},
-    special:{label:'Salle spéciale',cap:25,icon:'✨'},
-    entrance:{label:'Entrée principale',cap:0,icon:'🚪'},
-    stair:{label:'Escalier',cap:0,icon:'🪜'},
-  };
-  const info=typeInfo2[room.type]||typeInfo2.classroom;
-  const floorLabel=BD.floors[fid].label;
-  document.getElementById('bsRoomContent').innerHTML=`
-    <div class="bs-room-card">
-      <div class="bs-room-icon" style="background:${room.color||'#6BB5D6'}22">${room.icon||info.icon}</div>
-      <div>
-        <div class="bs-room-title">Salle ${room.label}</div>
-        <div class="bs-room-sub">${floorLabel}</div>
-        <span class="bs-room-badge">${info.label}</span>
-      </div>
-    </div>
-    <div class="bs-stats">
-      <div class="bs-stat"><strong>${info.cap||'—'}</strong><span>Capacité</span></div>
-      <div class="bs-stat"><strong>${room.type==='stair'?'↕':'↔'}</strong><span>${room.type==='stair'?'Multi-étage':'Même étage'}</span></div>
-    </div>
-    <div class="bs-actions">
-      <button class="bs-btn-goto" onclick="mobileGoTo('${room.id}','${fid}')">🧭 Y aller</button>
-      <button class="bs-btn-route" onclick="mobileSetFrom('${room.id}','${fid}')">🚀 Depuis ici</button>
-    </div>
-  `;
-  closeBsRoute();
-  bsOverlay.classList.add('show');
-  bsRoom.classList.remove('peek');
-  bsRoom.classList.add('show');
-}
-
-function closeBsRoom(){
-  bsRoom.classList.remove('show','peek');
-  bsOverlay.classList.remove('show');
-  if(!bsRoute.classList.contains('show'))bsOverlay.classList.remove('show');
-}
-
-// Swipe vers le bas pour fermer la bottom sheet salle
-let bsRoomDrag={on:false,startY:0,startT:0};
-document.getElementById('bsRoomHandle').addEventListener('touchstart',e=>{
-  bsRoomDrag={on:true,startY:e.touches[0].clientY,startT:Date.now()};
-},{passive:true});
-document.getElementById('bsRoomHandle').addEventListener('touchmove',e=>{
-  if(!bsRoomDrag.on)return;
-  const dy=e.touches[0].clientY-bsRoomDrag.startY;
-  if(dy>0)bsRoom.style.transform=`translateY(${dy}px)`;
-},{passive:true});
-document.getElementById('bsRoomHandle').addEventListener('touchend',e=>{
-  if(!bsRoomDrag.on)return;
-  bsRoomDrag.on=false;
-  const dy=e.changedTouches[0].clientY-bsRoomDrag.startY;
-  bsRoom.style.transform='';
-  if(dy>80)closeBsRoom();
-},{passive:true});
-
-// ── Bottom Sheet — Itinéraire ────────────────────────────────
-const bsRoute = document.getElementById('bsRoute');
-
-function openBsRoute(){
-  if(!isMobile())return;
-  bsOverlay.classList.add('show');
-  bsRoute.classList.add('show');
-  // Synchroniser les selects mobile avec les selects desktop
-  syncMobileRouteSelects();
-}
-function closeBsRoute(){
-  bsRoute.classList.remove('show');
-  if(!bsRoom.classList.contains('show'))bsOverlay.classList.remove('show');
-}
-document.getElementById('bsRouteClose').addEventListener('click',()=>{
-  closeBsRoute();
-});
-
-function syncMobileRouteSelects(){
-  const rooms=allRooms();
-  [document.getElementById('mRouteFrom'),document.getElementById('mRouteTo')].forEach((sel,i)=>{
-    const desktop=i===0?document.getElementById('routeFrom'):document.getElementById('routeTo');
-    const cur=sel.value;
-    sel.innerHTML=i===0?'<option value="">Départ — choisir une salle</option>':'<option value="">Arrivée — choisir une salle</option>';
-    rooms.forEach(r=>{
-      const o=document.createElement('option');
-      o.value=JSON.stringify({id:r.id,floor:r.floor});
-      o.textContent=`${r.icon||''} Salle ${r.label} (${r.floorLabel})`;
-      sel.appendChild(o);
-    });
-    sel.value=cur||desktop.value;
-  });
-}
-
-document.getElementById('mCalcRoute').addEventListener('click',()=>{
-  const fv=document.getElementById('mRouteFrom').value;
-  const tv=document.getElementById('mRouteTo').value;
-  if(!fv||!tv)return;
-  // Synchroniser avec les selects desktop
-  document.getElementById('routeFrom').value=fv;
-  document.getElementById('routeTo').value=tv;
-  document.getElementById('calcRoute').click();
-  // Copier le résultat dans la bottom sheet
-  setTimeout(()=>{
-    const ri=document.getElementById('routeInfo');
-    document.getElementById('mRouteInfo').innerHTML=ri.innerHTML;
-    document.getElementById('mRouteInfo').className=ri.className;
-  },50);
-});
-
-document.getElementById('mClearRoute').addEventListener('click',()=>{
-  document.getElementById('clearRoute').click();
-  document.getElementById('mRouteFrom').value='';
-  document.getElementById('mRouteTo').value='';
-  document.getElementById('mRouteInfo').innerHTML='';
-  document.getElementById('mRouteInfo').className='route-info';
-});
-
-// Swipe pour fermer itinéraire
-let bsRouteDrag={on:false,startY:0};
-document.getElementById('bsRouteHandle').addEventListener('touchstart',e=>{
-  bsRouteDrag={on:true,startY:e.touches[0].clientY};
-},{passive:true});
-document.getElementById('bsRouteHandle').addEventListener('touchmove',e=>{
-  if(!bsRouteDrag.on)return;
-  const dy=e.touches[0].clientY-bsRouteDrag.startY;
-  if(dy>0)bsRoute.style.transform=`translateY(${dy}px)`;
-},{passive:true});
-document.getElementById('bsRouteHandle').addEventListener('touchend',e=>{
-  if(!bsRouteDrag.on)return;
-  bsRouteDrag.on=false;
-  const dy=e.changedTouches[0].clientY-bsRouteDrag.startY;
-  bsRoute.style.transform='';
-  if(dy>80)closeBsRoute();
-},{passive:true});
-
-// Fermer en tapant l'overlay
-bsOverlay.addEventListener('click',()=>{closeBsRoom();closeBsRoute();});
-
-// ── Actions mobiles depuis les cards ─────────────────────────
-function mobileGoTo(roomId,fid){
-  document.getElementById('mRouteTo').value=JSON.stringify({id:roomId,floor:fid});
-  document.getElementById('routeTo').value=JSON.stringify({id:roomId,floor:fid});
-  closeBsRoom();
-  openBsRoute();
-  syncMobileRouteSelects();
-  document.getElementById('mRouteTo').value=JSON.stringify({id:roomId,floor:fid});
-}
-function mobileSetFrom(roomId,fid){
-  closeBsRoom();
-  openBsRoute();
-  syncMobileRouteSelects();
-  document.getElementById('mRouteFrom').value=JSON.stringify({id:roomId,floor:fid});
-  document.getElementById('routeFrom').value=JSON.stringify({id:roomId,floor:fid});
-}
 
 // ── Touch events canvas 2D ────────────────────────────────────
 let touches={};
@@ -1168,7 +958,8 @@ cv2.addEventListener('touchstart',e=>{
     pinchZoom0=S.zoom;
     pinchPanX0=S.panX;pinchPanY0=S.panY;
     const rect=cv2.getBoundingClientRect();
-    touches.mid0=getTouchMid(ts[0],ts[1],rect);
+    const mid=getTouchMid(ts[0],ts[1],rect);
+    touches.mid0=mid;
   }
 },{passive:false});
 
@@ -1181,13 +972,17 @@ cv2.addEventListener('touchmove',e=>{
     S.panX=S.panStart.x+ts[0].clientX-S.dragStart.x;
     S.panY=S.panStart.y+ts[0].clientY-S.dragStart.y;
     draw2d();drawMinimap();
-  } else if(ts.length===2&&pinchDist0){
+  } else if(ts.length===2){
     const dist=getTouchDist(ts[0],ts[1]);
     const scale=dist/pinchDist0;
     const newZoom=Math.min(5,Math.max(0.15,pinchZoom0*scale));
-    const mid0=touches.mid0;
-    S.panX=mid0.x-(mid0.x-pinchPanX0)*(newZoom/pinchZoom0);
+    const rect=cv2.getBoundingClientRect();
+    const mid=getTouchMid(ts[0],ts[1],rect);
+    const mid0=touches.mid0||mid;
+    // Zoom centré sur le milieu des deux doigts
+    S.panX=mid.sx!==undefined?S.panX:mid0.x-(mid0.x-pinchPanX0)*(newZoom/pinchZoom0);
     S.panY=mid0.y-(mid0.y-pinchPanY0)*(newZoom/pinchZoom0);
+    S.panX=mid0.x-(mid0.x-pinchPanX0)*(newZoom/pinchZoom0);
     S.zoom=newZoom;
     draw2d();drawMinimap();
   }
@@ -1199,40 +994,41 @@ cv2.addEventListener('touchend',e=>{
   if(e.touches.length===0&&S.isDrag){
     S.isDrag=false;
     const moved=Math.hypot(ts[0].clientX-S.dragStart.x,ts[0].clientY-S.dragStart.y);
-    if(moved<10){
+    if(moved<8){
       const rect=cv2.getBoundingClientRect();
       const hit=roomAt(ts[0].clientX-rect.left,ts[0].clientY-rect.top);
       if(hit){
-        if(S.admin){openAdminEditor(hit.room,hit.floor);}
+        if(S.admin)openAdminEditor(hit.room,hit.floor);
         else{
           S.highlight=hit.room.id;
           showRoomDetail(hit.room,hit.floor);
           centerOn(hit.room,hit.floor);
           draw2d();
-          if(isMobile()){closeBsRoute();openBsRoom(hit.room,hit.floor);}
+          // Sur mobile, ouvrir le drawer pour voir le détail
+          if(isMobile())openDrawer();
         }
       } else {
         S.highlight=null;
         document.getElementById('roomDetailBlock').style.display='none';
         draw2d();
-        if(isMobile()){closeBsRoom();}
       }
     }
   }
-  if(e.touches.length<2)pinchDist0=0;
+  if(e.touches.length<2){
+    pinchDist0=0;
+  }
 },{passive:false});
 
-// Double-tap pour zoomer sur une salle
+// Double-tap pour zoomer
 let lastTap=0;
 cv2.addEventListener('touchend',e=>{
   if(e.touches.length!==0)return;
   const now=Date.now();
-  if(now-lastTap<280){
+  if(now-lastTap<300){
     const rect=cv2.getBoundingClientRect();
     const t=e.changedTouches[0];
     const hit=roomAt(t.clientX-rect.left,t.clientY-rect.top);
-    if(hit)zoomTo(hit.room,hit.floor,2.8);
-    else{S.zoom=Math.min(5,S.zoom*1.6);draw2d();drawMinimap();}
+    if(hit)zoomTo(hit.room,hit.floor,2.5);
   }
   lastTap=now;
 },{passive:true});

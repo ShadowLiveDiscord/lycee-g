@@ -149,12 +149,38 @@ input,select{font-family:var(--font-ui);}
 
 .canvas-zone{flex:1;position:relative;overflow:hidden;background:var(--canvas-bg);}
 
-/* ── Drawer overlay ── */
+/* ── Drawer overlay (mobile) ── */
 .drawer-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);
   z-index:25;backdrop-filter:blur(3px);
 }
 .drawer-overlay.show{display:block;}
+
+/* ── FAB bouton plan (mobile) ── */
+.fab-map{
+  display:none;position:fixed;bottom:5rem;right:1rem;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--accent);border:none;color:#fff;font-size:1.4rem;
+  box-shadow:0 4px 20px rgba(47,129,247,0.5);
+  cursor:pointer;z-index:20;transition:all var(--trans);
+  align-items:center;justify-content:center;
+}
+.fab-map:active{transform:scale(0.92);}
+
+/* ── Bottom bar mobile ── */
+.mobile-bottom{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  height:56px;background:var(--bg2);border-top:1px solid var(--border);
+  z-index:20;align-items:center;justify-content:space-around;padding:0 0.5rem;
+}
+.mbb{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text2);font-size:0.6rem;
+  cursor:pointer;padding:0.3rem 0.5rem;border-radius:var(--radius-sm);
+  transition:all var(--trans);min-width:52px;
+}
+.mbb span.mbb-icon{font-size:1.2rem;line-height:1;}
+.mbb.active,.mbb:active{color:var(--accent);}
 
 /* ── Hamburger ── */
 .hamburger{
@@ -167,216 +193,6 @@ input,select{font-family:var(--font-ui);}
 .hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg);}
 .hamburger.open span:nth-child(2){opacity:0;}
 .hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
-
-/* ── Mobile search bar (flottante sur canvas) ── */
-.m-searchbar{
-  display:none;position:absolute;top:0.7rem;left:0.7rem;right:0.7rem;
-  z-index:15;
-  background:var(--bg2);border-radius:28px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.45);
-  border:1px solid var(--border);
-  align-items:center;gap:0.4rem;padding:0 0.5rem 0 0.75rem;
-  height:48px;
-}
-.m-searchbar__menu{
-  background:none;border:none;color:var(--text2);
-  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;border-radius:50%;transition:background var(--trans);
-}
-.m-searchbar__menu:active{background:var(--bg3);}
-.m-searchbar__input{
-  flex:1;background:none;border:none;outline:none;
-  color:var(--text);font-family:var(--font-ui);font-size:0.95rem;
-  padding:0;min-width:0;
-}
-.m-searchbar__input::placeholder{color:var(--text2);}
-.m-searchbar__clear{
-  display:none;background:var(--bg4);border:none;color:var(--text2);
-  width:22px;height:22px;border-radius:50%;font-size:0.7rem;
-  align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
-}
-.m-searchbar__clear.show{display:flex;}
-.m-searchbar__theme{
-  background:none;border:none;color:var(--text2);
-  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;font-size:1rem;border-radius:50%;transition:background var(--trans);
-}
-.m-searchbar__theme:active{background:var(--bg3);}
-
-/* Résultats recherche mobile */
-.m-search-results{
-  display:none;position:absolute;top:calc(0.7rem + 56px);left:0.7rem;right:0.7rem;
-  z-index:15;background:var(--bg2);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,0.4);
-  max-height:55vh;overflow-y:auto;
-}
-.m-search-results.show{display:block;}
-.m-sug-item{
-  display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;
-  border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--trans);
-}
-.m-sug-item:last-child{border-bottom:none;}
-.m-sug-item:active{background:var(--bg3);}
-.m-sug-icon{
-  width:38px;height:38px;border-radius:10px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-  background:var(--bg3);
-}
-.m-sug-info{flex:1;min-width:0;}
-.m-sug-name{font-weight:600;font-size:0.92rem;color:var(--text);}
-.m-sug-floor{font-size:0.75rem;color:var(--text2);margin-top:1px;}
-.m-sug-type{font-size:0.7rem;color:var(--accent2);background:rgba(47,129,247,0.12);padding:1px 7px;border-radius:99px;}
-
-/* ── Pills étage (sur canvas mobile) ── */
-.m-floor-pills{
-  display:none;position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);
-  z-index:15;
-  background:var(--bg2);border-radius:28px;border:1px solid var(--border);
-  box-shadow:0 4px 16px rgba(0,0,0,0.4);
-  display:none;align-items:center;gap:2px;padding:3px;
-}
-.m-pill{
-  padding:0.38rem 0.9rem;border-radius:24px;border:none;
-  background:transparent;color:var(--text2);font-size:0.78rem;font-weight:500;
-  cursor:pointer;transition:all var(--trans);white-space:nowrap;
-  font-family:var(--font-ui);
-}
-.m-pill.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(47,129,247,0.4);}
-.m-pill:active{transform:scale(0.96);}
-
-/* ── FABs flottants (mobile) ── */
-.m-fabs{
-  display:none;position:absolute;right:0.75rem;bottom:5rem;
-  flex-direction:column;gap:0.5rem;z-index:15;align-items:center;
-}
-.m-fab{
-  width:46px;height:46px;border-radius:50%;border:none;
-  background:var(--bg2);color:var(--text);
-  box-shadow:0 3px 14px rgba(0,0,0,0.45);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all var(--trans);font-size:1.1rem;
-  border:1px solid var(--border);
-}
-.m-fab:active{transform:scale(0.9);}
-.m-fab--route{font-size:1.3rem;}
-.m-fab--center{font-size:1.2rem;}
-.m-fab--3d{font-family:var(--font-title);font-size:0.8rem;font-weight:700;letter-spacing:0.03em;}
-.m-fab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-
-/* ── Bottom Sheet mobile ── */
-.bottom-sheet{
-  display:none;position:fixed;left:0;right:0;bottom:0;
-  background:var(--bg2);border-radius:20px 20px 0 0;
-  box-shadow:0 -4px 32px rgba(0,0,0,0.5);
-  z-index:40;
-  transform:translateY(100%);
-  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
-  max-height:90vh;overflow:hidden;
-  border-top:1px solid var(--border);
-}
-.bottom-sheet.show{transform:translateY(0);}
-.bottom-sheet.peek{transform:translateY(calc(100% - 160px));}
-
-.bs-handle-wrap{
-  padding:0.6rem 1rem 0.5rem;
-  cursor:grab;user-select:none;
-}
-.bs-handle-wrap:active{cursor:grabbing;}
-.bs-handle{
-  width:36px;height:4px;border-radius:99px;
-  background:var(--bg4);margin:0 auto 0.5rem;
-}
-.bs-header-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 0 0.3rem;
-}
-.bs-title{
-  font-family:var(--font-title);font-weight:700;font-size:0.95rem;color:var(--text);
-}
-.bs-close{
-  background:var(--bg3);border:none;color:var(--text2);
-  width:28px;height:28px;border-radius:50%;font-size:0.75rem;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-}
-
-.bs-content{
-  overflow-y:auto;max-height:calc(90vh - 80px);
-  padding:0 1rem 2rem;
-}
-.bs-content::-webkit-scrollbar{display:none;}
-
-/* Card salle dans la bottom sheet */
-.bs-room-card{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;}
-.bs-room-icon{
-  width:56px;height:56px;border-radius:16px;
-  display:flex;align-items:center;justify-content:center;font-size:1.8rem;
-  flex-shrink:0;
-}
-.bs-room-title{font-family:var(--font-title);font-weight:800;font-size:1.4rem;color:var(--text);}
-.bs-room-sub{font-size:0.8rem;color:var(--text2);margin-top:2px;}
-.bs-room-badge{
-  display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:99px;
-  background:rgba(47,129,247,0.15);color:var(--accent2);margin-top:4px;
-}
-
-.bs-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.2rem;}
-.bs-stat{
-  background:var(--bg3);border-radius:var(--radius);padding:0.75rem;text-align:center;
-  border:1px solid var(--border);
-}
-.bs-stat strong{display:block;font-family:var(--font-title);font-size:1.1rem;font-weight:700;color:var(--text);}
-.bs-stat span{font-size:0.7rem;color:var(--text2);}
-
-.bs-actions{display:flex;gap:0.6rem;}
-.bs-btn-goto{
-  flex:1;padding:0.85rem;background:var(--accent);border:none;border-radius:var(--radius);
-  color:#fff;font-family:var(--font-title);font-weight:700;font-size:0.9rem;
-  cursor:pointer;transition:all var(--trans);
-}
-.bs-btn-goto:active{transform:scale(0.97);}
-.bs-btn-route{
-  padding:0.85rem 1.1rem;background:var(--bg3);border:1px solid var(--border);
-  border-radius:var(--radius);color:var(--text);font-size:0.9rem;
-  cursor:pointer;transition:all var(--trans);
-}
-.bs-btn-route:active{background:var(--bg4);}
-
-/* Itinéraire bottom sheet */
-.bs-route-fields{
-  background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);
-  overflow:hidden;margin-bottom:0.9rem;
-}
-.bs-route-field{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;}
-.bs-route-field+.bs-route-field{border-top:1px solid var(--border);}
-.bs-route-dot{
-  width:12px;height:12px;border-radius:50%;flex-shrink:0;
-}
-.bs-route-dot--from{background:var(--green);box-shadow:0 0 0 3px rgba(63,185,80,0.2);}
-.bs-route-dot--to{background:var(--red);box-shadow:0 0 0 3px rgba(248,81,73,0.2);}
-.bs-route-sep{height:1px;background:var(--border);margin:0 1rem;}
-.bs-select{
-  flex:1;background:none;border:none;outline:none;color:var(--text);
-  font-family:var(--font-ui);font-size:0.9rem;cursor:pointer;min-width:0;
-}
-.bs-select option{background:var(--bg2);}
-.bs-route-actions{display:flex;gap:0.6rem;margin-bottom:0.9rem;}
-.bs-btn-go{
-  flex:1;padding:0.85rem;background:var(--accent);border:none;border-radius:var(--radius);
-  color:#fff;font-family:var(--font-title);font-weight:700;font-size:0.9rem;cursor:pointer;
-}
-.bs-btn-go:active{transform:scale(0.97);}
-.bs-btn-clear{
-  padding:0.85rem 1rem;background:var(--bg3);border:1px solid var(--border);
-  border-radius:var(--radius);color:var(--text2);font-size:0.85rem;cursor:pointer;
-}
-.bs-btn-clear:active{background:var(--bg4);}
-
-/* Overlay bottom sheet */
-.bs-overlay{
-  display:none;position:fixed;inset:0;z-index:35;
-  background:rgba(0,0,0,0.4);
-}
-.bs-overlay.show{display:block;}
 
 /* ── Sidebar blocks ── */
 .sb{
@@ -584,65 +400,106 @@ canvas:active{cursor:grabbing;}
 @media (max-width: 768px) {
 
   :root{
-    --header-h: 0px;  /* Header desktop masqué sur mobile */
-    --sidebar-w: min(88vw, 340px);
+    --header-h: 54px;
+    --sidebar-w: min(85vw, 320px);
   }
 
-  /* Header desktop masqué sur mobile — on utilise la searchbar flottante */
-  .header{display:none;}
+  /* Header compact */
+  .header{padding:0 0.75rem;gap:0.5rem;}
+  .header__name{font-size:0.82rem;}
+  .header__sub{display:none;}
+  .header__controls{gap:0.4rem;}
 
-  /* Layout prend tout l'écran */
-  .layout{height:100vh;overflow:hidden;}
-
-  /* Sidebar drawer */
-  .sidebar{
-    position:fixed;top:0;left:0;
-    height:100vh;
-    width:var(--sidebar-w);
-    transform:translateX(-100%);
-    box-shadow:4px 0 24px rgba(0,0,0,0.45);
-    z-index:50;padding:3rem 0.9rem 1rem;
-  }
-  .sidebar.open{transform:translateX(0);}
-
-  /* Canvas zone : plein écran total */
-  .canvas-zone{width:100%;flex:1;}
+  /* Cacher les tab-groups dans le header, affichés dans la bottom bar */
+  .header__controls .tab-group{display:none;}
+  .header__controls .icon-btns{gap:3px;}
+  .icon-btn{width:36px;height:36px;font-size:1rem;}
 
   /* Hamburger visible */
   .hamburger{display:flex;}
 
-  /* Éléments mobiles visibles */
-  .m-searchbar{display:flex;}
-  .m-floor-pills{display:flex;}
-  .m-fabs{display:flex;}
-  .bottom-sheet{display:block;}
+  /* Sidebar : drawer hors écran par défaut — width:0 pour ne pas impacter le layout flex */
+  .sidebar{
+    position:fixed;top:var(--header-h);left:0;
+    width:var(--sidebar-w);
+    height:calc(100vh - var(--header-h));
+    transform:translateX(-100%);
+    box-shadow:4px 0 24px rgba(0,0,0,0.4);
+    flex-shrink:0;
+  }
+  /* Retirer la sidebar du flux flex sur mobile */
+  .layout .sidebar{
+    position:fixed;
+  }
+  .sidebar.open{transform:translateX(0);}
 
-  /* Minimap cachée (remplacée par les pills) */
-  #minimap{display:none;}
+  /* Canvas zone prend tout — la sidebar est en fixed, elle ne prend plus de place dans le flex */
+  .canvas-zone{width:100%;flex:1;}
+  /* Hauteur du layout réduite pour laisser place à la bottom bar */
+  .layout{overflow:hidden;height:calc(100vh - var(--header-h) - 56px);}
 
-  /* Tooltip désactivé */
+  /* Minimap plus petite, repositionnée */
+  #minimap{
+    width:110px;height:75px;
+    bottom:4.5rem;right:0.5rem;
+  }
+
+  /* Bottom bar visible */
+  .mobile-bottom{display:flex;}
+
+  /* FAB visible */
+  .fab-map{display:flex;}
+
+  /* Tooltip désactivé sur mobile (remplacé par tap) */
   #tooltip{display:none!important;}
 
-  /* Contrôles 3D au-dessus des pills */
-  .v3-controls{bottom:4rem;}
-  .v3-btn{padding:0.55rem 0.9rem;font-size:0.82rem;}
-
-  /* Modals plein écran */
+  /* Modals plein écran sur mobile */
   .modal{
-    width:calc(100vw - 1.5rem)!important;
-    max-height:85vh;overflow-y:auto;padding:1.4rem;
+    width:calc(100vw - 2rem)!important;
+    max-height:calc(100vh - 4rem);
+    overflow-y:auto;
+    padding:1.4rem;
   }
-  .modal--wide{width:calc(100vw - 1.5rem)!important;}
+  .modal--wide{width:calc(100vw - 2rem)!important;}
+
+  /* Boutons modals plus grands */
   .mbtn{padding:0.65rem 1rem;font-size:0.88rem;}
-  .modal-input{padding:0.7rem 0.9rem;font-size:0.93rem;}
+
+  /* Inputs plus grands pour les doigts */
+  .sb__input,.route-field select,.modal-input{
+    padding:0.65rem 0.85rem;font-size:0.9rem;
+  }
+  .btn-primary{padding:0.75rem;font-size:0.88rem;}
+  .btn-secondary{padding:0.6rem;font-size:0.82rem;}
+
+  /* Filter buttons plus grands */
+  .filter-btn{padding:0.35rem 0.75rem;font-size:0.78rem;}
 
   /* Splash adapté */
-  .splash__logo{width:72px;height:72px;font-size:26px;}
-  .splash__title{font-size:1.4rem;}
+  .splash__logo{width:70px;height:70px;font-size:24px;}
+  .splash__title{font-size:1.3rem;}
+
+  /* 3D controls repositionnés */
+  .v3-controls{bottom:4.5rem;}
+  .v3-btn{padding:0.55rem 0.9rem;font-size:0.82rem;}
+
+  /* Suggestions plus hautes */
+  .suggestions{max-height:220px;}
+
+  /* Sidebar padding ajusté */
+  .sidebar{padding:0.75rem;}
+
+  /* Espace en bas pour la bottom bar */
+  .canvas-zone{padding-bottom:0;}
 }
 
 /* Très petits écrans */
 @media (max-width: 380px) {
-  .m-pill{padding:0.32rem 0.7rem;font-size:0.72rem;}
-  .m-fab{width:42px;height:42px;}
+  :root{--header-h:50px;}
+  .header__name{font-size:0.75rem;}
+  .logo{width:32px;height:32px;}
+  .logo__t{font-size:10px;}
+  #minimap{display:none;}
+  .mbb{min-width:44px;font-size:0.55rem;}
+  .mbb span.mbb-icon{font-size:1.1rem;}
 }
