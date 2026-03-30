@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#0d1117"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Plan Interactif — Lycée Gustave Eiffel Ermont</title>
 <link rel="stylesheet" href="style.css"/>
 </head>
@@ -16,7 +19,7 @@
   <div class="splash__bar"><div class="splash__fill"></div></div>
 </div>
 
-<!-- HEADER -->
+<!-- ══════════════ DESKTOP HEADER ══════════════ -->
 <header class="header">
   <div class="header__left">
     <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
@@ -47,23 +50,19 @@
   </div>
 </header>
 
-<!-- DRAWER OVERLAY (mobile) -->
+<!-- DRAWER OVERLAY (desktop sidebar) -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 
 <!-- LAYOUT -->
 <div class="layout">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (desktop) -->
   <aside class="sidebar">
-
-    <!-- Recherche -->
     <div class="sb">
       <div class="sb__title">🔍 Recherche</div>
       <input class="sb__input" id="searchInput" type="text" placeholder="Numéro ou nom de salle…"/>
       <div class="suggestions" id="suggestions"></div>
     </div>
-
-    <!-- Filtre -->
     <div class="sb">
       <div class="sb__title">🏷 Filtrer par type</div>
       <div class="filter-btns">
@@ -74,14 +73,10 @@
         <button class="filter-btn" data-filter="entrance">Entrée</button>
       </div>
     </div>
-
-    <!-- Détail salle -->
     <div class="sb" id="roomDetailBlock" style="display:none">
       <div class="sb__title">📍 Salle sélectionnée</div>
       <div class="room-detail show" id="roomDetail"></div>
     </div>
-
-    <!-- Itinéraire -->
     <div class="sb">
       <div class="sb__title">🧭 Itinéraire</div>
       <div class="route-field">
@@ -96,8 +91,6 @@
       <button class="btn-secondary" id="clearRoute">Effacer l'itinéraire</button>
       <div class="route-info" id="routeInfo"></div>
     </div>
-
-    <!-- Légende -->
     <div class="sb">
       <div class="sb__title">📋 Légende</div>
       <div class="legend">
@@ -109,16 +102,49 @@
         <div class="leg-item"><div class="leg-dot" style="background:#2f81f7"></div>Itinéraire</div>
       </div>
     </div>
-
   </aside>
 
   <!-- CANVAS ZONE -->
   <main class="canvas-zone">
 
+    <!-- ══ MOBILE SEARCH BAR (flottante sur le canvas) ══ -->
+    <div class="m-searchbar" id="mSearchBar">
+      <button class="m-searchbar__menu" id="mMenuBtn" aria-label="Menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
+          <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+      <input class="m-searchbar__input" id="mSearchInput" type="search"
+             placeholder="Chercher une salle…" autocomplete="off" autocorrect="off"/>
+      <button class="m-searchbar__clear" id="mSearchClear" aria-label="Effacer">✕</button>
+      <button class="m-searchbar__theme" id="mThemeBtn" aria-label="Thème">☀</button>
+    </div>
+
+    <!-- Résultats de recherche mobile (overlay) -->
+    <div class="m-search-results" id="mSearchResults"></div>
+
+    <!-- ══ PILLS ÉTAGE sur canvas (mobile) ══ -->
+    <div class="m-floor-pills" id="mFloorPills">
+      <button class="m-pill active" data-floor="rdc">🏠 RDC</button>
+      <button class="m-pill" data-floor="etage1">🏢 Étage 1</button>
+      <button class="m-pill" data-floor="both">⬆⬇ Les deux</button>
+    </div>
+
+    <!-- ══ BOUTONS FLOTTANTS (mobile) ══ -->
+    <div class="m-fabs">
+      <button class="m-fab m-fab--route" id="mFabRoute" title="Itinéraire">🧭</button>
+      <button class="m-fab m-fab--center" id="mFabCenter" title="Recentrer">⊙</button>
+      <button class="m-fab m-fab--3d" id="mFab3d" title="Vue 3D">3D</button>
+    </div>
+
+    <!-- CANVAS 2D -->
     <div class="view active" id="view2d">
       <canvas id="canvas2d"></canvas>
     </div>
 
+    <!-- CANVAS 3D -->
     <div class="view" id="view3d">
       <canvas id="canvas3d"></canvas>
       <div class="v3-controls">
@@ -136,26 +162,49 @@
   </main>
 </div>
 
-<!-- BOTTOM BAR MOBILE -->
-<nav class="mobile-bottom" id="mobileBottom">
-  <button class="mbb active" data-mbb="map" id="mbbMap">
-    <span class="mbb-icon">🗺️</span>Plan
-  </button>
-  <button class="mbb" data-mbb="search" id="mbbSearch">
-    <span class="mbb-icon">🔍</span>Chercher
-  </button>
-  <button class="mbb" data-mbb="route" id="mbbRoute">
-    <span class="mbb-icon">🧭</span>Itinéraire
-  </button>
-  <button class="mbb" data-mbb="floor" id="mbbFloor">
-    <span class="mbb-icon">🏢</span>Étage
-  </button>
-  <button class="mbb" data-mbb="view" id="mbbView">
-    <span class="mbb-icon">👁</span>Vue
-  </button>
-</nav>
+<!-- ══════════════ BOTTOM SHEET MOBILE ══════════════ -->
 
-<!-- TOOLTIP -->
+<!-- Salle sélectionnée -->
+<div class="bottom-sheet" id="bsRoom">
+  <div class="bs-handle-wrap" id="bsRoomHandle">
+    <div class="bs-handle"></div>
+  </div>
+  <div class="bs-content" id="bsRoomContent"></div>
+</div>
+
+<!-- Itinéraire -->
+<div class="bottom-sheet" id="bsRoute">
+  <div class="bs-handle-wrap" id="bsRouteHandle">
+    <div class="bs-handle"></div>
+    <div class="bs-header-row">
+      <span class="bs-title">🧭 Itinéraire</span>
+      <button class="bs-close" id="bsRouteClose">✕</button>
+    </div>
+  </div>
+  <div class="bs-content">
+    <div class="bs-route-fields">
+      <div class="bs-route-field">
+        <div class="bs-route-dot bs-route-dot--from"></div>
+        <select id="mRouteFrom" class="bs-select"><option value="">Départ — choisir une salle</option></select>
+      </div>
+      <div class="bs-route-sep"></div>
+      <div class="bs-route-field">
+        <div class="bs-route-dot bs-route-dot--to"></div>
+        <select id="mRouteTo" class="bs-select"><option value="">Arrivée — choisir une salle</option></select>
+      </div>
+    </div>
+    <div class="bs-route-actions">
+      <button class="bs-btn-go" id="mCalcRoute">Calculer</button>
+      <button class="bs-btn-clear" id="mClearRoute">Effacer</button>
+    </div>
+    <div class="route-info" id="mRouteInfo"></div>
+  </div>
+</div>
+
+<!-- BOTTOM SHEET OVERLAY -->
+<div class="bs-overlay" id="bsOverlay"></div>
+
+<!-- TOOLTIP (desktop) -->
 <div id="tooltip"></div>
 
 <!-- MODAL ADMIN LOGIN -->
